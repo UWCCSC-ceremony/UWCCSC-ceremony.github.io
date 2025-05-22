@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Message Wall</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: #f5f5f5;
+        }
+        #qr-container {
+            text-align: center;
+            margin: 20px;
+        }
+        #message-form {
+            margin-top: 20px;
+        }
+        textarea {
+            width: 300px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="qr-container">
+    <h2>Scan to Submit a Message</h2>
+    <div id="qrcode"></div>
+</div>
+
+<div id="message-form">
+    <h3>Or type a message:</h3>
+    <textarea id="message-input" placeholder="Your message..."></textarea>
+    <br>
+    <button onclick="submitMessage()">Submit</button>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+
+<!-- QR Code Library -->
+<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+
+<script>
+    // Your Firebase Config (replace with yours)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAsgIAfyPOMafcvuPan_o5XDd2RlzOK-po",
+        authDomain: "uwc-ceremony.firebaseapp.com",
+        projectId: "uwc-ceremony",
+        storageBucket: "uwc-ceremony.firebasestorage.app",
+        messagingSenderId: "232512421634",
+        appId: "1:232512421634:web:55a19abf940fe8035b8c1b",
+        measurementId: "G-ESVXQMZ3QC"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Generate QR Code
+    new QRCode(document.getElementById("qrcode"), {
+        text: window.location.href,
+        width: 200,
+        height: 200
+    });
+
+    // Submit Message to Firestore
+    function submitMessage() {
+        const message = document.getElementById("message-input").value.trim();
+        if (message) {
+            db.collection("messages").add({
+                text: message,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+                .then(() => {
+                    alert("Message sent!");
+                    document.getElementById("message-input").value = "";
+                })
+                .catch(error => {
+                    console.error("Error writing message: ", error);
+                });
+        }
+    }
+</script>
+</body>
+</html>
