@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Submit Your Message</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -30,6 +32,7 @@
       border: 1px solid #ddd;
       border-radius: 4px;
       font-family: Arial, sans-serif;
+      font-size: 16px;
     }
     button {
       background: #4285f4;
@@ -39,6 +42,7 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
+      width: 100%;
     }
     button:hover {
       background: #3367d6;
@@ -47,23 +51,31 @@
       margin-top: 15px;
       color: #4285f4;
       font-weight: bold;
+      text-align: center;
+    }
+    @media (max-width: 600px) {
+      #message-form {
+        padding: 20px;
+      }
+      textarea {
+        height: 120px;
+      }
     }
   </style>
 </head>
 <body>
 <div id="message-form">
-  <h2>Leave Your Message</h2>
+  <h2 style="text-align:center;">Leave Your Message</h2>
   <textarea id="message" placeholder="Type your message here..."></textarea>
   <button id="submit-btn">Submit Message</button>
   <div id="status"></div>
 </div>
 
-<!-- Supabase JS CDN -->
 <script src="js/supabase.min.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co'; // replace this
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4'; // replace this
+  document.addEventListener('DOMContentLoaded', function () {
+    const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -80,6 +92,9 @@
         return;
       }
 
+      submitBtn.disabled = true; // prevent multiple clicks
+      submitBtn.textContent = 'Submitting...';
+
       try {
         const ipResponse = await fetch('https://api.ipify.org?format=json');
         const ipData = await ipResponse.json();
@@ -91,17 +106,18 @@
 
         if (error) throw error;
 
-        statusDiv.textContent = 'Message submitted successfully!';
-        statusDiv.style.color = 'green';
-        messageInput.value = '';
+        // Redirect after success
+        window.location.href = 'success.html';
+
       } catch (error) {
         console.error("Full error:", error);
         statusDiv.textContent = `Error: ${error.message}`;
         statusDiv.style.color = 'red';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Message';
       }
     });
   });
 </script>
-
 </body>
 </html>
