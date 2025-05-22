@@ -65,14 +65,32 @@
 </head>
 <body>
 <div id="message-form">
-  <h2 style="text-align:center;">Leave Your Message</h2>
-  <textarea id="message" placeholder="Type your message here..."></textarea>
-  <button id="submit-btn">Submit Message</button>
+  <h2 style="text-align:center;"></h2>
+  <textarea id="message" placeholder=""></textarea>
+  <button id="submit-btn"></button>
   <div id="status"></div>
 </div>
 
 <script src="js/supabase.min.js"></script>
 <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const userLang = navigator.language;
+    const isChinese = userLang.startsWith('zh');
+
+    const header = document.querySelector('h2');
+    const textarea = document.getElementById('message');
+    const submitBtn = document.getElementById('submit-btn');
+
+    if (isChinese) {
+      header.textContent = '留下你的留言';
+      textarea.placeholder = '在这里输入你的留言...';
+      submitBtn.textContent = '提交留言';
+    } else {
+      header.textContent = 'Leave Your Message';
+      textarea.placeholder = 'Type your message here...';
+      submitBtn.textContent = 'Submit Message';
+    }
+  });
   document.addEventListener('DOMContentLoaded', function () {
     const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';

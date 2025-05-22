@@ -6,43 +6,291 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
             background: #f5f5f5;
+            overflow: hidden;
+            position: relative;
+            height: 100vh;
         }
+
+        #message-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .message {
+            position: absolute;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 18px;
+            white-space: nowrap;
+            opacity: 1;
+            left: 0;
+            transform: translateX(-100%);
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #countdown {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            background: rgba(255,255,255,0.8);
+            padding: 10px 15px;
+            border-radius: 10px;
+            z-index: 100;
+        }
+
+        #video-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 40%;
+            max-width: 500px;
+            display: none;
+            background: black;
+            border-radius: 8px;
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        #video-player {
+            width: 100%;
+            height: auto;
+        }
+
         #qr-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
             text-align: center;
-            margin: 20px;
+            background: rgba(255,255,255,0.8);
+            padding: 10px;
+            border-radius: 10px;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
+<div id="countdown">03:00</div>
+<div id="message-container"></div>
+<div id="video-container">
+    <video id="video-player" controls autoplay></video>
+</div>
 <div id="qr-container">
     <div id="qrcode"></div>
 </div>
 
 <!-- Firebase SDK -->
-
-
+<script src="js/supabase.min.js"></script>
 <!-- QR Code Library -->
 <script src="js/qrcode.min.js"></script>
-<script>
 
+<script>
+    // Initialize Supabase
+    const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Generate QR Code
     function getBaseURL() {
-         // This gives you the protocol and hostname (e.g., https://uwccsc-ceremony.github.io)
         return window.location.origin;
     }
-
-    // Generate QR Code pointing to submission page
     const submitURL = `${getBaseURL()}/submit`;
     new QRCode(document.getElementById("qrcode"), {
         text: submitURL,
-        width: 200,
-        height: 200
+        width: 100,
+        height: 100
+    });
+
+    // Light color palette for messages
+    const lightColors = [
+        '#FFD3B6', '#FFAAA5', '#DCEDC1', '#A8E6CF', '#D4F1F9',
+        '#FFECF1', '#E2F0CB', '#B5EAD7', '#C7CEEA', '#F8C8DC',
+        '#FFEEAD', '#B4E0F7', '#F9D5E5', '#E1F7D5', '#FFDAC1',
+        '#C4E3F3', '#F3E5FF', '#E8F8F8', '#FFF6E0', '#D5E5E6'
+    ];
+
+    // Variables for message queue
+    let messageQueue = [];
+    let isAnimating = false;
+    let messageElements = [];
+
+    // Countdown variables
+    let countdownTime = 3 * 60; // 3 minutes in seconds
+    const countdownElement = document.getElementById('countdown');
+    let countdownInterval;
+
+    // Video container
+    const videoContainer = document.getElementById('video-container');
+    const videoPlayer = document.getElementById('video-player');
+
+    // Function to start countdown
+    function startCountdown() {
+        updateCountdownDisplay();
+        countdownInterval = setInterval(() => {
+            countdownTime--;
+            updateCountdownDisplay();
+
+            if (countdownTime <= 0) {
+                clearInterval(countdownInterval);
+                playVideo();
+            }
+        }, 1000);
+    }
+
+    function updateCountdownDisplay() {
+        const minutes = Math.floor(countdownTime / 60);
+        const seconds = countdownTime % 60;
+        countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function playVideo() {
+        // Replace with your video URL
+        videoPlayer.src = 'https://example.com/your-video.mp4';
+        videoContainer.style.display = 'block';
+        videoPlayer.play();
+    }
+
+    // Function to get a random light color
+    function getRandomLightColor() {
+        return lightColors[Math.floor(Math.random() * lightColors.length)];
+    }
+
+    // Function to get a random Y position (avoiding top and bottom edges)
+    function getRandomYPosition() {
+        return 10 + Math.random() * 70; // 10% to 80% of viewport height
+    }
+
+    // Function to animate a message
+    function animateMessage(messageElement, duration, callback) {
+        const startTime = performance.now();
+        const containerWidth = document.getElementById('message-container').clientWidth;
+        const messageWidth = messageElement.clientWidth;
+        const targetX = containerWidth - messageWidth;
+
+        function step(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Move from left to right
+            const translateX = progress * targetX;
+            messageElement.style.transform = `translateX(${translateX}px)`;
+
+            // Fade out when near the end
+            if (progress > 0.8) {
+                messageElement.style.opacity = 1 - (progress - 0.8) * 5;
+            }
+
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            } else {
+                messageElement.remove();
+                messageElements = messageElements.filter(el => el !== messageElement);
+                if (callback) callback();
+            }
+        }
+
+        requestAnimationFrame(step);
+    }
+
+    // Function to process the message queue
+    function processQueue() {
+        if (messageQueue.length === 0 || isAnimating) return;
+
+        isAnimating = true;
+        const messageData = messageQueue.shift();
+
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.textContent = messageData.text;
+        messageElement.style.top = `${getRandomYPosition()}%`;
+        messageElement.style.backgroundColor = getRandomLightColor();
+
+        document.getElementById('message-container').appendChild(messageElement);
+        messageElements.push(messageElement);
+
+        // Force layout calculation
+        messageElement.offsetHeight;
+
+        const duration = 20000; // 20 seconds animation duration
+        animateMessage(messageElement, duration, () => {
+            isAnimating = false;
+            processQueue();
+        });
+    }
+
+    // Function to fetch messages from Supabase
+    async function fetchMessages() {
+        try {
+            // Get messages from the last 5 minutes
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+            const { data, error } = await supabase
+                .from('messages')
+                .select('*')
+                .gte('created_at', fiveMinutesAgo)
+                .order('created_at', { ascending: true });
+
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                // Add new messages to queue
+                data.forEach(message => {
+                    // Check if this message is already displayed or in queue
+                    if (!messageQueue.some(m => m.id === message.id) &&
+                        !messageElements.some(el => el.dataset.id === message.id)) {
+                        messageQueue.push(message);
+                    }
+                });
+
+                // Process queue if not already animating
+                if (!isAnimating) {
+                    processQueue();
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
+    }
+
+    // Set up real-time subscription
+    function setupRealtime() {
+        const subscription = supabase
+            .channel('messages')
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'messages'
+            }, payload => {
+                // Add new message to queue
+                messageQueue.push(payload.new);
+                if (!isAnimating) {
+                    processQueue();
+                }
+            })
+            .subscribe();
+    }
+
+    // Initialize the page
+    document.addEventListener('DOMContentLoaded', () => {
+        startCountdown();
+        fetchMessages();
+        setupRealtime();
+
+        // Check for new messages every 10 seconds
+        setInterval(fetchMessages, 10000);
+
+        // Process queue periodically in case of any issues
+        setInterval(() => {
+            if (!isAnimating && messageQueue.length > 0) {
+                processQueue();
+            }
+        }, 1000);
     });
 </script>
 </body>
