@@ -108,11 +108,11 @@
     });
 
     // Light color palette for messages
-    const lightColors = [
-        '#FFD3B6', '#FFAAA5', '#DCEDC1', '#A8E6CF', '#D4F1F9',
-        '#FFECF1', '#E2F0CB', '#B5EAD7', '#C7CEEA', '#F8C8DC',
-        '#FFEEAD', '#B4E0F7', '#F9D5E5', '#E1F7D5', '#FFDAC1',
-        '#C4E3F3', '#F3E5FF', '#E8F8F8', '#FFF6E0', '#D5E5E6'
+    const colors = [
+        '#FF9A76', '#FF7676', '#C5E07F', '#72D6A0', '#92CFEF',
+        '#FFA4B2', '#D4E684', '#5EC3B9', '#8B9CD9', '#E48DB3',
+        '#FFC97E', '#6FAED6', '#F5A6C8', '#94DFA3', '#FFB38A',
+        '#86AAD5', '#D1A5FF', '#A2DFDF', '#F1C76D', '#9FBABB'
     ];
 
     // Variables for message queue
@@ -151,14 +151,14 @@
 
     function playVideo() {
         // Replace with your video URL
-        videoPlayer.src = 'https://example.com/your-video.mp4';
+        videoPlayer.src = 'https://streamable.com/odummk';
         videoContainer.style.display = 'block';
         videoPlayer.play();
     }
 
     // Function to get a random light color
-    function getRandomLightColor() {
-        return lightColors[Math.floor(Math.random() * lightColors.length)];
+    function getRandomColor() {
+        return colors[Math.floor(Math.random() * colors.length)];
     }
 
     // Function to get a random Y position (avoiding top and bottom edges)
@@ -209,7 +209,7 @@
         messageElement.className = 'message';
         messageElement.textContent = messageData.text;
         messageElement.style.top = `${getRandomYPosition()}%`;
-        messageElement.style.backgroundColor = getRandomLightColor();
+        messageElement.style.backgroundColor = getRandomColor();
 
         document.getElementById('message-container').appendChild(messageElement);
         messageElements.push(messageElement);
