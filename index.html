@@ -21,7 +21,6 @@
 </head>
 <body>
 <div id="qr-container">
-    <h1>QR Code Scanner</h1>
     <div id="qrcode"></div>
 </div>
 
@@ -48,7 +47,7 @@
 
     // Generate QR Code pointing to submission page
     new QRCode(document.getElementById("qrcode"), {
-        text: window.location.href.replace('index.html', 'submit.html'),
+        text: window.location.href.replace('https://uwccsc-ceremony.github.io', 'https://uwccsc-ceremony.github.io/submit'),
         width: 200,
         height: 200
     });
