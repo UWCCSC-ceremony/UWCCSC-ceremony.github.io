@@ -58,69 +58,50 @@
   <div id="status"></div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="js/firebase-app-compat.js"></script>
-<script src="js/firebase-firestore-compat.js"></script>
-
+<!-- Supabase JS CDN -->
+<script src="js/supabase.min.js"></script>
 <script>
-
   document.addEventListener('DOMContentLoaded', function() {
-    try {
-      const firebaseConfig = {
-        apiKey: "AIzaSyAsgIAfyPOMafcvuPan_o5XDd2RlzOK-po",
-        authDomain: "uwc-ceremony.firebaseapp.com",
-        projectId: "uwc-ceremony",
-        storageBucket: "uwc-ceremony.appspot.com", // Fixed this line
-        messagingSenderId: "232512421634",
-        appId: "1:232512421634:web:55a19abf940fe8035b8c1b",
-        measurementId: "G-ESVXQMZ3QC"
-      };
+    const SUPABASE_URL = 'https://your-project-id.supabase.co'; // replace this
+    const SUPABASE_ANON_KEY = 'your-anon-key'; // replace this
 
-      // Initialize Firebase
-      const app = firebase.initializeApp(firebaseConfig);
-      const db = firebase.firestore();
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-      console.log("Firebase initialized successfully");
+    const submitBtn = document.getElementById('submit-btn');
+    const messageInput = document.getElementById('message');
+    const statusDiv = document.getElementById('status');
 
-      const submitBtn = document.getElementById('submit-btn');
-      const messageInput = document.getElementById('message');
-      const statusDiv = document.getElementById('status');
+    submitBtn.addEventListener('click', async function () {
+      const message = messageInput.value.trim();
 
-      submitBtn.addEventListener('click', async function() {
-        const message = messageInput.value.trim();
+      if (message === '') {
+        statusDiv.textContent = 'Please enter a message!';
+        statusDiv.style.color = 'red';
+        return;
+      }
 
-        if (message === '') {
-          statusDiv.textContent = 'Please enter a message!';
-          statusDiv.style.color = 'red';
-          return;
-        }
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const ip = ipData.ip || 'unknown';
 
-        try {
-          const ipResponse = await fetch('https://api.ipify.org?format=json');
-          const ipData = await ipResponse.json();
-          const ip = ipData.ip || 'unknown';
+        const { error } = await supabase
+                .from('messages')
+                .insert([{ text: message, ip: ip }]);
 
-          await db.collection("messages").add({
-            text: message,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-            ip: ip
-          });
+        if (error) throw error;
 
-          statusDiv.textContent = 'Message submitted successfully!';
-          statusDiv.style.color = 'green';
-          messageInput.value = '';
-        } catch (error) {
-          console.error("Full error:", error);
-          statusDiv.textContent = `Error: ${error.message}`;
-          statusDiv.style.color = 'red';
-        }
-      });
-    } catch (initError) {
-      console.error("Firebase initialization error:", initError);
-      document.getElementById('status').textContent =
-              "Failed to initialize Firebase. Please check console for details.";
-    }
+        statusDiv.textContent = 'Message submitted successfully!';
+        statusDiv.style.color = 'green';
+        messageInput.value = '';
+      } catch (error) {
+        console.error("Full error:", error);
+        statusDiv.textContent = `Error: ${error.message}`;
+        statusDiv.style.color = 'red';
+      }
+    });
   });
 </script>
+
 </body>
 </html>
