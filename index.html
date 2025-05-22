@@ -35,32 +35,7 @@
         }
 
         #countdown {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
-            background: rgba(255,255,255,0.8);
-            padding: 10px 15px;
-            border-radius: 10px;
-            z-index: 100;
-        }
-
-        #video-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 40%;
-            max-width: 500px;
-            display: none;
-            background: black;
-            border-radius: 8px;
-            overflow: hidden;
-            z-index: 100;
-        }
-
-        #video-player {
-            width: 100%;
-            height: auto;
+            display: none; /* Hidden but still functional */
         }
 
         #qr-container {
@@ -95,18 +70,13 @@
 </head>
 <body>
 <button id="start-button">Start Countdown</button>
-<div id="countdown" style="display: none;">03:00</div>
+<div id="countdown"></div>
 <div id="message-container"></div>
-<div id="video-container">
-    <video id="video-player" controls autoplay></video>
-</div>
 <div id="qr-container">
     <div id="qrcode"></div>
 </div>
 
-<!-- Firebase SDK -->
 <script src="js/supabase.min.js"></script>
-<!-- QR Code Library -->
 <script src="js/qrcode.min.js"></script>
 
 <script>
@@ -134,20 +104,6 @@
         '#86AAD5', '#D1A5FF', '#A2DFDF', '#F1C76D', '#9FBABB'
     ];
 
-    // Plan B messages
-    const planBMessages = [
-        "Congratulations to all graduates!",
-        "Your hard work has paid off!",
-        "The future belongs to you!",
-        "Dream big and achieve bigger!",
-        "Today is just the beginning!",
-        "Proud of your accomplishments!",
-        "The world needs your talents!",
-        "Celebrate this milestone!",
-        "Your journey continues!",
-        "Make your mark on the world!"
-    ];
-
     // Variables for message queue
     let messageQueue = [];
     let isAnimating = false;
@@ -158,51 +114,33 @@
 
     // Countdown variables
     let countdownTime = 3 * 60; // 3 minutes in seconds
-    const countdownElement = document.getElementById('countdown');
     let countdownInterval;
-
-    // Video container
-    const videoContainer = document.getElementById('video-container');
-    const videoPlayer = document.getElementById('video-player');
 
     // Start button
     const startButton = document.getElementById('start-button');
 
     // Function to start countdown
     function startCountdown() {
+        console.log("startCountdown function called"); // Debug log
         startButton.style.display = 'none';
-        countdownElement.style.display = 'block';
-        updateCountdownDisplay();
         countdownInterval = setInterval(() => {
             countdownTime--;
-            updateCountdownDisplay();
+            console.log("Countdown:", countdownTime); // Debug log
 
             if (countdownTime <= 0) {
+                console.log("Countdown finished"); // Debug log
                 clearInterval(countdownInterval);
-                playVideo();
                 if (planBTimer) clearInterval(planBTimer);
             }
         }, 1000);
 
         // Start Plan B check after 25 seconds
         setTimeout(() => {
-            if (messageQueue.length === 0 && !planBActive) {
+            console.log("Checking for Plan B activation"); // Debug log
+            if (messageQueue.lengt === 0 && !planBActive) {
                 activatePlanB();
             }
-        }, 25000);
-    }
-
-    function updateCountdownDisplay() {
-        const minutes = Math.floor(countdownTime / 60);
-        const seconds = countdownTime % 60;
-        countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    function playVideo() {
-        // Replace with your video URL
-        videoPlayer.src = 'https://streamable.com/odummk';
-        videoContainer.style.display = 'block';
-        videoPlayer.play();
+        }, 30000);
     }
 
     // Function to activate Plan B
@@ -214,6 +152,7 @@
             // Fetch the planb.txt file
             const response = await fetch('planb.txt');
             if (!response.ok) {
+                console.error('Failed to load planb.txt'); // Debug log
                 throw new Error('Failed to load planb.txt');
             }
 
@@ -222,20 +161,24 @@
             const messages = text.split('\n').filter(msg => msg.trim() !== '');
 
             if (messages.length === 0) {
+                console.warn('planb.txt is empty'); // Debug log
                 throw new Error('planb.txt is empty');
             }
 
             // Add all Plan B messages to queue
             messages.forEach((msg, index) => {
-                messageQueue.push({
+                const planBMessage = {
                     id: `planb-${index}`,
                     text: msg.trim(),
                     isPlanB: true
-                });
+                };
+                messageQueue.push(planBMessage);
+                console.log("Plan B message added to queue:", planBMessage); // Debug log
             });
 
             // Process queue if not already animating
             if (!isAnimating) {
+                console.log("Processing queue after Plan B activation"); // Debug log
                 processQueue();
             }
         } catch (error) {
@@ -250,14 +193,17 @@
             ];
 
             fallbackMessages.forEach((msg, index) => {
-                messageQueue.push({
+                const fallbackMessage = {
                     id: `planb-fallback-${index}`,
                     text: msg,
                     isPlanB: true
-                });
+                };
+                messageQueue.push(fallbackMessage);
+                console.log("Fallback message added to queue:", fallbackMessage); // Debug log
             });
 
             if (!isAnimating) {
+                console.log("Processing queue after fallback Plan B messages"); // Debug log
                 processQueue();
             }
         }
@@ -265,49 +211,66 @@
 
     // Function to get a random color
     function getRandomColor() {
-        return colors[Math.floor(Math.random() * colors.length)];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        console.log("Generated random color:", color); // Debug log
+        return color;
     }
 
     // Function to get a random Y position (avoiding top and bottom edges)
     function getRandomYPosition() {
-        return 10 + Math.random() * 70; // 10% to 80% of viewport height
+        const yPos = 10 + Math.random() * 70; // 10% to 80% of viewport height
+        console.log("Generated random Y position:", yPos); // Debug log
+        return yPos;
     }
 
     // Function to record a message as played
     async function recordPlayedMessage(messageId) {
+        console.log("Attempting to record played message:", messageId); // Debug log
         try {
             const { error } = await supabase
                 .from('played')
                 .insert([{ id: messageId }]);
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error recording played message:', error); // Debug log
+                throw error;
+            }
             playedMessageIds.add(messageId);
+            console.log("Message recorded as played:", messageId); // Debug log
         } catch (error) {
-            console.error('Error recording played message:', error);
+            console.error('Error recording played message:', error); // Debug log
         }
     }
 
     // Function to get already played messages
     async function fetchPlayedMessages() {
+        console.log("Fetching already played messages"); // Debug log
         try {
             const { data, error } = await supabase
                 .from('played')
                 .select('id');
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error fetching played messages:', error); // Debug log
+                throw error;
+            }
 
             if (data && data.length > 0) {
                 data.forEach(item => {
                     playedMessageIds.add(item.id);
                 });
+                console.log("Fetched played message IDs:", playedMessageIds); // Debug log
+            } else {
+                console.log("No played messages found."); // Debug log
             }
         } catch (error) {
-            console.error('Error fetching played messages:', error);
+            console.error('Error fetching played messages:', error); // Debug log
         }
     }
 
     // Function to animate a message
     function animateMessage(messageElement, duration, callback) {
+        console.log("Animating message:", messageElement.textContent, "for", duration, "ms"); // Debug log
         const startTime = performance.now();
         const containerWidth = document.getElementById('message-container').clientWidth;
         const messageWidth = messageElement.clientWidth;
@@ -329,21 +292,28 @@
             if (progress < 1) {
                 requestAnimationFrame(step);
             } else {
+                console.log("Animation finished for:", messageElement.textContent); // Debug log
                 messageElement.remove();
                 messageElements = messageElements.filter(el => el !== messageElement);
-                if (callback) callback();
+                if (callback) {
+                    console.log("Callback after animation for:", messageElement.textContent); // Debug log
+                    callback();
+                }
             }
         }
 
         requestAnimationFrame(step);
     }
 
-    // Function to process the message queue
     function processQueue() {
-        if (messageQueue.length === 0 || isAnimating) return;
+        if (messageQueue.length === 0 || isAnimating) {
+            console.log("Queue is empty or animation in progress. Returning."); // Debug log
+            return;
+        }
 
         isAnimating = true;
         const messageData = messageQueue.shift();
+        console.log("Processing message from queue:", messageData); // Debug log
 
         const messageElement = document.createElement('div');
         messageElement.className = 'message';
@@ -356,28 +326,35 @@
 
         document.getElementById('message-container').appendChild(messageElement);
         messageElements.push(messageElement);
+        console.log("Message element created and added to container:", messageElement); // Debug log
 
-        // Record the message as played (if not Plan B)
         if (messageData.id && !messageData.isPlanB) {
             recordPlayedMessage(messageData.id);
         }
 
-        // Force layout calculation
-        messageElement.offsetHeight;
+        messageElement.offsetHeight; // Force layout calculation
 
         const duration = 20000; // 20 seconds animation duration
         animateMessage(messageElement, duration, () => {
             isAnimating = false;
-            // Schedule next message in exactly 2 minutes (120000ms)
-            setTimeout(processQueue, 120000 - duration);
+            console.log("Animation completed. Processing next in queue."); // Debug log
+            // Process next message immediately if available
+            if (messageQueue.length > 0) {
+                processQueue();
+            } else {
+                // Check again after short delay if queue becomes empty
+                setTimeout(processQueue, 1000);
+            }
         });
     }
 
     // Function to fetch messages from Supabase
     async function fetchMessages() {
+        console.log("Fetching new messages from Supabase"); // Debug log
         try {
             // Get messages from the last 5 minutes
             const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+            console.log("Fetching messages since:", fiveMinutesAgo); // Debug log
 
             const { data, error } = await supabase
                 .from('messages')
@@ -385,30 +362,41 @@
                 .gte('timestamp', fiveMinutesAgo)
                 .order('timestamp', { ascending: true });
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error fetching messages:', error); // Debug log
+                throw error;
+            }
 
             if (data && data.length > 0) {
+                console.log("Fetched messages:", data); // Debug log
                 // Add new messages to queue that haven't been played
                 data.forEach(message => {
                     if (!playedMessageIds.has(message.id.toString()) &&
                         !messageQueue.some(m => m.id === message.id) &&
                         !messageElements.some(el => el.dataset.id === message.id.toString())) {
                         messageQueue.push(message);
+                        console.log("New message added to queue:", message); // Debug log
+                    } else {
+                        console.log("Message already played or in queue/DOM:", message.id); // Debug log
                     }
                 });
 
                 // Process queue if not already animating
                 if (!isAnimating && messageQueue.length > 0) {
+                    console.log("Processing queue after fetching new messages"); // Debug log
                     processQueue();
                 }
+            } else {
+                console.log("No new messages fetched."); // Debug log
             }
         } catch (error) {
-            console.error('Error fetching messages:', error);
+            console.error('Error fetching messages:', error); // Debug log
         }
     }
 
     // Set up real-time subscription
     function setupRealtime() {
+        console.log("Setting up real-time subscription"); // Debug log
         const subscription = supabase
             .channel('messages')
             .on('postgres_changes', {
@@ -416,33 +404,38 @@
                 schema: 'public',
                 table: 'messages'
             }, payload => {
+                console.log("Realtime INSERT event received:", payload); // Debug log
                 // Add new message to queue if not already played
                 if (!playedMessageIds.has(payload.new.id.toString())) {
                     messageQueue.push(payload.new);
+                    console.log("New realtime message added to queue:", payload.new); // Debug log
                     if (!isAnimating) {
+                        console.log("Processing queue after realtime event"); // Debug log
                         processQueue();
                     }
+                } else {
+                    console.log("Realtime message already played:", payload.new.id); // Debug log
                 }
             })
             .subscribe();
+        console.log("Real-time subscription started:", subscription); // Debug log
     }
 
     // Initialize the page
     document.addEventListener('DOMContentLoaded', async () => {
-        // First load played messages
+        console.log("DOMContentLoaded event fired"); // Debug log
         await fetchPlayedMessages();
-
-        // Then fetch new messages
         fetchMessages();
-
-        // Set up real-time
         setupRealtime();
-
-        // Set up start button
-        startButton.addEventListener('click', startCountdown);
-
-        // Check for new messages every 30 seconds
-        setInterval(fetchMessages, 30000);
+        startButton.addEventListener('click', () => {
+            console.log("Start button clicked"); // Debug log
+            startCountdown();
+        });
+        setInterval(() => {
+            console.log("Periodic message fetch triggered"); // Debug log
+            fetchMessages();
+        }, 30000);
+        console.log("Initialization complete"); // Debug log
     });
 </script>
 </body>
