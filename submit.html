@@ -65,7 +65,7 @@
     const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co'; // replace this
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4'; // replace this
 
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const submitBtn = document.getElementById('submit-btn');
     const messageInput = document.getElementById('message');
