@@ -275,12 +275,10 @@
 
     // Function to record a message as played
     async function recordPlayedMessage(messageId) {
-        if (messageId.startsWith('planb-')) return; // Don't record Plan B messages
-
         try {
             const { error } = await supabase
                 .from('played')
-                .insert([{ message_id: messageId }]);
+                .insert([{ id: messageId }]);
 
             if (error) throw error;
             playedMessageIds.add(messageId);
@@ -294,13 +292,13 @@
         try {
             const { data, error } = await supabase
                 .from('played')
-                .select('message_id');
+                .select('id');
 
             if (error) throw error;
 
             if (data && data.length > 0) {
                 data.forEach(item => {
-                    playedMessageIds.add(item.message_id);
+                    playedMessageIds.add(item.id);
                 });
             }
         } catch (error) {
