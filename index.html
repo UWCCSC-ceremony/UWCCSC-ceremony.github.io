@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>QR Code Scanner</title>
+    <title>UWCCSC_Ceremony_2025</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -45,9 +45,15 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
 
+    function getBaseURL() {
+         // This gives you the protocol and hostname (e.g., https://uwccsc-ceremony.github.io)
+        return window.location.origin;
+    }
+
     // Generate QR Code pointing to submission page
+    const submitURL = `${getBaseURL()}/submit`;
     new QRCode(document.getElementById("qrcode"), {
-        text: window.location.href.replace('https://uwccsc-ceremony.github.io', 'https://uwccsc-ceremony.github.io/submit'),
+        text: submitURL,
         width: 200,
         height: 200
     });
