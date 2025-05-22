@@ -79,39 +79,61 @@
   const db = firebase.firestore();
 
   document.addEventListener('DOMContentLoaded', function() {
-    const submitBtn = document.getElementById('submit-btn');
-    const messageInput = document.getElementById('message');
-    const statusDiv = document.getElementById('status');
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyAsgIAfyPOMafcvuPan_o5XDd2RlzOK-po",
+        authDomain: "uwc-ceremony.firebaseapp.com",
+        projectId: "uwc-ceremony",
+        storageBucket: "uwc-ceremony.appspot.com", // Fixed this line
+        messagingSenderId: "232512421634",
+        appId: "1:232512421634:web:55a19abf940fe8035b8c1b",
+        measurementId: "G-ESVXQMZ3QC"
+      };
 
-    submitBtn.addEventListener('click', async function () {
-      const message = messageInput.value.trim();
+      // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
 
-      if (message === '') {
-        statusDiv.textContent = 'Please enter a message!';
-        statusDiv.style.color = 'red';
-        return;
-      }
+      console.log("Firebase initialized successfully");
 
-      // Add a new document to Firestore
-      db.collection("messages").add({
-        text: message,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        ip: await fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => data.ip)
-                .catch(() => 'unknown')
-      })
-              .then(() => {
-                statusDiv.textContent = 'Message submitted successfully!';
-                statusDiv.style.color = 'green';
-                messageInput.value = '';
-              })
-              .catch((error) => {
-                console.error("Error adding document: ", error);
-                statusDiv.textContent = 'Error submitting message. Please try again.';
-                statusDiv.style.color = 'red';
-              });
-    });
+      const submitBtn = document.getElementById('submit-btn');
+      const messageInput = document.getElementById('message');
+      const statusDiv = document.getElementById('status');
+
+      submitBtn.addEventListener('click', async function() {
+        const message = messageInput.value.trim();
+
+        if (message === '') {
+          statusDiv.textContent = 'Please enter a message!';
+          statusDiv.style.color = 'red';
+          return;
+        }
+
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipResponse.json();
+          const ip = ipData.ip || 'unknown';
+
+          await db.collection("messages").add({
+            text: message,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            ip: ip
+          });
+
+          statusDiv.textContent = 'Message submitted successfully!';
+          statusDiv.style.color = 'green';
+          messageInput.value = '';
+        } catch (error) {
+          console.error("Full error:", error);
+          statusDiv.textContent = `Error: ${error.message}`;
+          statusDiv.style.color = 'red';
+        }
+      });
+    } catch (initError) {
+      console.error("Firebase initialization error:", initError);
+      document.getElementById('status').textContent =
+              "Failed to initialize Firebase. Please check console for details.";
+    }
   });
 </script>
 </body>
