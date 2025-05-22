@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Submit Your Message</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    #message-form {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 15px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #3367d6;
+    }
+    #status {
+      margin-top: 15px;
+      color: #4285f4;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div id="message-form">
+  <h2>Leave Your Message</h2>
+  <textarea id="message" placeholder="Type your message here..."></textarea>
+  <button id="submit-btn">Submit Message</button>
+  <div id="status"></div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="js/firebase-app-compat.js"></script>
+<script src="js/firebase-firestore-compat.js"></script>
+
+<script>
+  // Firebase Config (same as index.html)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAsgIAfyPOMafcvuPan_o5XDd2RlzOK-po",
+    authDomain: "uwc-ceremony.firebaseapp.com",
+    projectId: "uwc-ceremony",
+    storageBucket: "uwc-ceremony.appspot.com",
+    messagingSenderId: "232512421634",
+    appId: "1:232512421634:web:55a19abf940fe8035b8c1b",
+    measurementId: "G-ESVXQMZ3QC"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const submitBtn = document.getElementById('submit-btn');
+    const messageInput = document.getElementById('message');
+    const statusDiv = document.getElementById('status');
+
+    submitBtn.addEventListener('click', async function () {
+      const message = messageInput.value.trim();
+
+      if (message === '') {
+        statusDiv.textContent = 'Please enter a message!';
+        statusDiv.style.color = 'red';
+        return;
+      }
+
+      // Add a new document to Firestore
+      db.collection("messages").add({
+        text: message,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        ip: await fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => data.ip)
+                .catch(() => 'unknown')
+      })
+              .then(() => {
+                statusDiv.textContent = 'Message submitted successfully!';
+                statusDiv.style.color = 'green';
+                messageInput.value = '';
+              })
+              .catch((error) => {
+                console.error("Error adding document: ", error);
+                statusDiv.textContent = 'Error submitting message. Please try again.';
+                statusDiv.style.color = 'red';
+              });
+    });
+  });
+</script>
+</body>
+</html>

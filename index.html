@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Message Wall</title>
+    <title>QR Code Scanner</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,23 +17,12 @@
             text-align: center;
             margin: 20px;
         }
-        #message-form {
-            margin-top: 20px;
-        }
-        textarea {
-            width: 300px;
-            height: 100px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
 <div id="qr-container">
-
+    <h1>Scan to Leave a Message</h1>
     <div id="qrcode"></div>
-</div>
-
-<div id="message-form">
 </div>
 
 <!-- Firebase SDK -->
@@ -43,12 +32,12 @@
 <!-- QR Code Library -->
 <script src="js/qrcode.min.js"></script>
 <script>
-    // Your Firebase Config (replace with yours)
+    // Firebase Config
     const firebaseConfig = {
         apiKey: "AIzaSyAsgIAfyPOMafcvuPan_o5XDd2RlzOK-po",
         authDomain: "uwc-ceremony.firebaseapp.com",
         projectId: "uwc-ceremony",
-        storageBucket: "uwc-ceremony.firebasestorage.app",
+        storageBucket: "uwc-ceremony.appspot.com",
         messagingSenderId: "232512421634",
         appId: "1:232512421634:web:55a19abf940fe8035b8c1b",
         measurementId: "G-ESVXQMZ3QC"
@@ -56,11 +45,10 @@
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
 
-    // Generate QR Code
+    // Generate QR Code pointing to submission page
     new QRCode(document.getElementById("qrcode"), {
-        text: window.location.href,
+        text: window.location.href.replace('index.html', 'submit.html'),
         width: 200,
         height: 200
     });
