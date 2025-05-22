@@ -28,10 +28,25 @@
             white-space: nowrap;
             opacity: 1;
             left: 0;
-            transform: translateX(-100%);
+            transform: translateX(0%);
             animation-timing-function: linear;
             animation-fill-mode: forwards;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        @keyframes fly {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(100vw);
+            }
+        }
+
+        .message {
+            animation-name: fly;
+            animation-duration: 30s;
+            animation-timing-function: linear;
+            animation-fill-mode: forwards;
         }
 
         #countdown {
@@ -137,10 +152,10 @@
         // Start Plan B check after 25 seconds
         setTimeout(() => {
             console.log("Checking for Plan B activation"); // Debug log
-            if (messageQueue.lengt === 0 && !planBActive) {
+            if (messageQueue.length === 0 && !planBActive) {
                 activatePlanB();
             }
-        }, 30000);
+        }, 25000);
     }
 
     // Function to activate Plan B
@@ -150,18 +165,22 @@
 
         try {
             // Fetch the planb.txt file
+            console.log("Attempting to fetch planb.txt");
             const response = await fetch('planb.txt');
+            console.log("planb.txt fetch response status:", response.status);
             if (!response.ok) {
-                console.error('Failed to load planb.txt'); // Debug log
+                console.error('Failed to load planb.txt:', response.status, response.statusText);
                 throw new Error('Failed to load planb.txt');
             }
 
             const text = await response.text();
+            console.log("planb.txt content length:", text.length);
             // Split by newlines and filter out empty lines
             const messages = text.split('\n').filter(msg => msg.trim() !== '');
+            console.log("Number of Plan B messages loaded:", messages.length);
 
             if (messages.length === 0) {
-                console.warn('planb.txt is empty'); // Debug log
+                console.warn('planb.txt is empty or contains no valid messages');
                 throw new Error('planb.txt is empty');
             }
 
@@ -273,20 +292,18 @@
         console.log("Animating message:", messageElement.textContent, "for", duration, "ms"); // Debug log
         const startTime = performance.now();
         const containerWidth = document.getElementById('message-container').clientWidth;
-        const messageWidth = messageElement.clientWidth;
-        const targetX = containerWidth - messageWidth;
 
         function step(currentTime) {
             const elapsed = currentTime - startTime;
             const progress = Math.min(elapsed / duration, 1);
 
             // Move from left to right
-            const translateX = progress * targetX;
+            const translateX = (containerWidth * progress);
             messageElement.style.transform = `translateX(${translateX}px)`;
 
             // Fade out when near the end
-            if (progress > 0.8) {
-                messageElement.style.opacity = 1 - (progress - 0.8) * 5;
+            if (progress > 0.9) {
+                messageElement.style.opacity = 1 - (progress - 0.9) * 10;
             }
 
             if (progress < 1) {
@@ -294,7 +311,6 @@
             } else {
                 console.log("Animation finished for:", messageElement.textContent); // Debug log
                 messageElement.remove();
-                messageElements = messageElements.filter(el => el !== messageElement);
                 if (callback) {
                     console.log("Callback after animation for:", messageElement.textContent); // Debug log
                     callback();
@@ -306,12 +322,11 @@
     }
 
     function processQueue() {
-        if (messageQueue.length === 0 || isAnimating) {
-            console.log("Queue is empty or animation in progress. Returning."); // Debug log
+        if (messageQueue.length === 0) {
+            console.log("Queue is empty. Returning."); // Debug log
             return;
         }
 
-        isAnimating = true;
         const messageData = messageQueue.shift();
         console.log("Processing message from queue:", messageData); // Debug log
 
@@ -334,18 +349,17 @@
 
         messageElement.offsetHeight; // Force layout calculation
 
-        const duration = 20000; // 20 seconds animation duration
+        const duration = 30000; // 30 seconds animation duration
         animateMessage(messageElement, duration, () => {
-            isAnimating = false;
-            console.log("Animation completed. Processing next in queue."); // Debug log
-            // Process next message immediately if available
+            messageElements = messageElements.filter(el => el !== messageElement);
+        });
+
+        // Schedule next message after 3 seconds
+        setTimeout(() => {
             if (messageQueue.length > 0) {
                 processQueue();
-            } else {
-                // Check again after short delay if queue becomes empty
-                setTimeout(processQueue, 1000);
             }
-        });
+        }, 3000);
     }
 
     // Function to fetch messages from Supabase
