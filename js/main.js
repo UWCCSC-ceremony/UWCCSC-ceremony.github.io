@@ -26,14 +26,27 @@ const colors = [
 let playedMessageIds = new Set();
 let activeMessageElements = new Set();
 let lastMessageTime = 0;
-let lastPlanBTime = 0; // Separate timing for Plan B messages
+let lastPlanBTime = 0;
 let isInitialized = false;
 let isStarted = false;
 let planBMessages = [];
 let usedPlanBMessages = new Set();
 let planBCheckInterval = null;
 let startTime = 0;
-let recentMessagePositions = []; // Array to store recent message positions
+let recentMessagePositions = [];
+
+// Function to save played message IDs to session storage
+function savePlayedMessages() {
+    sessionStorage.setItem('playedMessageIds', JSON.stringify([...playedMessageIds]));
+}
+
+// Function to load played message IDs from session storage
+function loadPlayedMessages() {
+    const saved = sessionStorage.getItem('playedMessageIds');
+    if (saved) {
+        playedMessageIds = new Set(JSON.parse(saved));
+    }
+}
 
 // Class to track message position information
 class MessagePosition {
@@ -175,37 +188,12 @@ function checkAndAddPlanBMessage() {
 }
 
 // Function to record a message as played
-async function recordPlayedMessage(messageId) {
-    try {
-        const { error } = await supabase
-            .from('played')
-            .insert([{ id: messageId }]);
-
-        if (error) throw error;
-        playedMessageIds.add(messageId);
-    } catch (error) {
-        console.error('Error recording played message:', error);
-    }
+function recordPlayedMessage(messageId) {
+    playedMessageIds.add(messageId);
+    savePlayedMessages();
 }
 
-// Function to get already played messages
-async function fetchPlayedMessages() {
-    try {
-        const { data, error } = await supabase
-            .from('played')
-            .select('id');
-
-        if (error) throw error;
-
-        if (data) {
-            data.forEach(item => playedMessageIds.add(item.id));
-        }
-    } catch (error) {
-        console.error('Error fetching played messages:', error);
-    }
-}
-
-// Function to animate and manage a message
+// Function to create and animate a message
 function createAndAnimateMessage(messageData) {
     if (!isStarted) return;
 
@@ -329,10 +317,8 @@ async function initializeSystem() {
     if (isInitialized) return;
     
     try {
-        await Promise.all([
-            fetchPlayedMessages(),
-            loadPlanBMessages()
-        ]);
+        loadPlayedMessages(); // Load played messages from session storage
+        await loadPlanBMessages();
         
         setupRealtime();
         
