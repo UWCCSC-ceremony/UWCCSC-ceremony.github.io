@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Constants
-const MAX_MESSAGES_ON_SCREEN = 10;
+const MAX_MESSAGES_ON_SCREEN = 30;
 const MESSAGE_ANIMATION_DURATION = 30000; // 30 seconds
 const MESSAGE_SPAWN_INTERVAL = 1000; // 1 seconds between messages
 const FETCH_INTERVAL = 1000; // 1 second
