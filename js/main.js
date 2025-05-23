@@ -6,10 +6,10 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Constants
 const MAX_MESSAGES_ON_SCREEN = 10;
 const MESSAGE_ANIMATION_DURATION = 30000; // 30 seconds
-const MESSAGE_SPAWN_INTERVAL = 3000; // 3 seconds between messages
+const MESSAGE_SPAWN_INTERVAL = 1000; // 1 seconds between messages
 const FETCH_INTERVAL = 1000; // 1 second
 const PLAN_B_START_TIME = 25000; // 25 seconds
-const PLAN_B_CHECK_INTERVAL = 2000; // 2 seconds
+const PLAN_B_CHECK_INTERVAL = 1000; // 1 seconds
 const POSITION_MEMORY_SIZE = 5; // Remember last 5 message positions
 const MIN_Y_POSITION = 10; // Minimum Y position (%)
 const MAX_Y_POSITION = 90; // Maximum Y position (%)
