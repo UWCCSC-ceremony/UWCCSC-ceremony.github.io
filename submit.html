@@ -13,15 +13,14 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      background: url('background.jpg') no-repeat center center fixed;
-      background-size: cover;
+      background: #f5f5f5;
       padding: 20px;
     }
     #message-form {
-      background: rgba(255, 255, 255, 0.95);
+      background: white;
       padding: 30px;
       border-radius: 8px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 500px;
     }
@@ -72,7 +71,7 @@
   <div id="status"></div>
 </div>
 
-<script type="text/javascript" src="js/parse.min.js"></script>
+<script src="js/supabase.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const userLang = navigator.language;
@@ -81,7 +80,6 @@
     const header = document.querySelector('h2');
     const textarea = document.getElementById('message');
     const submitBtn = document.getElementById('submit-btn');
-    const statusDiv = document.getElementById('status');
 
     if (isChinese) {
       header.textContent = '留下你的留言';
@@ -92,52 +90,54 @@
       textarea.placeholder = 'Type your message here...';
       submitBtn.textContent = 'Submit Message';
     }
+  });
+  document.addEventListener('DOMContentLoaded', function () {
+    const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const submitBtn = document.getElementById('submit-btn');
+    const messageInput = document.getElementById('message');
+    const statusDiv = document.getElementById('status');
 
     submitBtn.addEventListener('click', async function () {
-      const message = textarea.value.trim();
+      const message = messageInput.value.trim();
 
       if (message === '') {
-        const errorText = isChinese ? '请输入留言！' : 'Please enter a message!';
-        statusDiv.textContent = errorText;
+        statusDiv.textContent = 'Please enter a message!';
         statusDiv.style.color = 'red';
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = isChinese ? '提交中...' : 'Submitting...';
+      submitBtn.disabled = true; // prevent multiple clicks
+      submitBtn.textContent = 'Submitting...';
 
       try {
-        // Get IP address
-        let ip = 'unknown';
-        try {
-          const ipResponse = await fetch('https://api.ipify.org?format=json');
-          const ipData = await ipResponse.json();
-          ip = ipData.ip || 'unknown';
-        } catch (ipError) {
-          console.error('Error getting IP:', ipError);
-        }
-        
-        // Try to submit to database
-        try {
-          const { error } = await supabase
-            .from('messages')
-            .insert([{ text: message, ip: ip }]);
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const ip = ipData.ip || 'unknown';
 
-          if (error) {
-            console.error('Database error:', error);
-          }
-        } catch (dbError) {
-          console.error('Database submission error:', dbError);
+        const { error } = await supabase
+                .from('messages')
+                .insert([{ text: message, ip: ip }]);
 
-        }
+        if (error) throw error;
 
-        // Always redirect to success page, even if there were errors
+        // Redirect after success
         window.location.href = 'success.html';
+        statusDiv.textContent = `submitted`;
+        statusDiv.style.color = 'green';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Message';
 
       } catch (error) {
-        console.error('General error:', error);
-        // Still redirect to success page
+        console.error("Full error:", error);
         window.location.href = 'success.html';
+        statusDiv.textContent = `Error: ${error.message}`;
+        statusDiv.style.color = 'red';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Message';
       }
     });
   });
