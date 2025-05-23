@@ -1,9 +1,7 @@
-// Initialize Parse
-Parse.initialize("zdPwa6EIi5IdVpvjOjndO2CDDF9ExtxRJaMHnY9v", "LQvNGqWYAmguTbiHx4jppJezHdMJJvEwU3XOIyAn");
-Parse.serverURL = "https://parseapi.back4app.com/";
-
-// Enable Live Query
-Parse.liveQueryServerURL = 'wss://parseapi.back4app.com';
+// Initialize Supabase
+const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Constants
 const MAX_MESSAGES_ON_SCREEN = 30;
@@ -250,63 +248,28 @@ function canSpawnNewMessage() {
     return Date.now() - lastMessageTime >= MESSAGE_SPAWN_INTERVAL;
 }
 
-// Set up real-time subscription
-async function setupRealtime() {
-    try {
-        const Message = Parse.Object.extend("Message");
-        const query = new Parse.Query(Message);
-        
-        // Subscribe to new messages
-        const subscription = await query.subscribe();
-        
-        subscription.on('create', (message) => {
-            if (isStarted && 
-                !playedMessageIds.has(message.id) && 
-                canShowMoreMessages() && 
-                canSpawnNewMessage()) {
-                createAndAnimateMessage({
-                    id: message.id,
-                    text: message.get("text"),
-                    isPlanB: false
-                });
-                lastMessageTime = Date.now();
-            }
-        });
-
-        console.log('Live Query subscription successful');
-    } catch (error) {
-        console.error('Live Query subscription error:', error);
-        // Continue initialization even if real-time fails
-        return;
-    }
-}
-
 // Function to fetch and process messages
 async function fetchAndProcessMessages() {
     if (!isStarted) return;
 
     try {
-        const Message = Parse.Object.extend("Message");
-        const query = new Parse.Query(Message);
-        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
         
-        query.greaterThanOrEqualTo("createdAt", fiveMinutesAgo);
-        query.ascending("createdAt");
-        query.limit(100); // Add a reasonable limit
-        
-        const results = await query.find();
-        
-        if (results.length > 0) {
-            for (const message of results) {
-                const messageId = message.id;
-                if (!playedMessageIds.has(messageId) && 
+        const { data, error } = await supabase
+            .from('messages')
+            .select('*')
+            .gte('timestamp', fiveMinutesAgo)
+            .order('timestamp', { ascending: true });
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+            // Process each message that hasn't been played
+            for (const message of data) {
+                if (!playedMessageIds.has(message.id) && 
                     canShowMoreMessages() && 
                     canSpawnNewMessage()) {
-                    createAndAnimateMessage({
-                        id: messageId,
-                        text: message.get("text"),
-                        isPlanB: false
-                    });
+                    createAndAnimateMessage(message);
                     lastMessageTime = Date.now();
                 }
             }
@@ -314,6 +277,26 @@ async function fetchAndProcessMessages() {
     } catch (error) {
         console.error('Error fetching messages:', error);
     }
+}
+
+// Set up real-time subscription
+function setupRealtime() {
+    const subscription = supabase
+        .channel('messages')
+        .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages'
+        }, async (payload) => {
+            if (!playedMessageIds.has(payload.new.id) && 
+                canShowMoreMessages() && 
+                canSpawnNewMessage() &&
+                isStarted) {
+                createAndAnimateMessage(payload.new);
+                lastMessageTime = Date.now();
+            }
+        })
+        .subscribe();
 }
 
 // Function to start the system
@@ -334,14 +317,12 @@ async function initializeSystem() {
     if (isInitialized) return;
     
     try {
-        loadPlayedMessages();
+        loadPlayedMessages(); // Load played messages from session storage
         await loadPlanBMessages();
         
-        // Start periodic message fetching first
-        setInterval(fetchAndProcessMessages, FETCH_INTERVAL);
+        setupRealtime();
         
-        // Then try to set up real-time (but don't block on it)
-        setupRealtime().catch(console.error);
+        setInterval(fetchAndProcessMessages, FETCH_INTERVAL);
         
         const startButton = document.getElementById('start-button');
         if (startButton) {

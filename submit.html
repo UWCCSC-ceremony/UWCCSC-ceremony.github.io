@@ -13,7 +13,7 @@
       justify-content: center;
       min-height: 100vh;
       margin: 0;
-      background: linear-gradient(to right, #009b90, #0064a6);
+      background: #f5f5f5;
       padding: 20px;
     }
     #message-form {
@@ -47,10 +47,6 @@
     button:hover {
       background: #3367d6;
     }
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-    }
     #status {
       margin-top: 15px;
       color: #4285f4;
@@ -75,12 +71,8 @@
   <div id="status"></div>
 </div>
 
-<script type="text/javascript" src="js/parse.min.js"></script>
+<script src="js/supabase.min.js"></script>
 <script>
-  // Initialize Parse
-  Parse.initialize("zdPwa6EIi5IdVpvjOjndO2CDDF9ExtxRJaMHnY9v", "LQvNGqWYAmguTbiHx4jppJezHdMJJvEwU3XOIyAn");
-  Parse.serverURL = "https://parseapi.back4app.com/";
-
   document.addEventListener('DOMContentLoaded', function () {
     const userLang = navigator.language;
     const isChinese = userLang.startsWith('zh');
@@ -98,48 +90,49 @@
       textarea.placeholder = 'Type your message here...';
       submitBtn.textContent = 'Submit Message';
     }
+  });
+  document.addEventListener('DOMContentLoaded', function () {
+    const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const submitBtn = document.getElementById('submit-btn');
+    const messageInput = document.getElementById('message');
+    const statusDiv = document.getElementById('status');
 
     submitBtn.addEventListener('click', async function () {
-      const message = textarea.value.trim();
+      const message = messageInput.value.trim();
 
       if (message === '') {
-        const errorText = isChinese ? '请输入留言！' : 'Please enter a message!';
-        statusDiv.textContent = errorText;
+        statusDiv.textContent = 'Please enter a message!';
         statusDiv.style.color = 'red';
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = isChinese ? '提交中...' : 'Submitting...';
-      const statusDiv = document.getElementById('status');
+      submitBtn.disabled = true; // prevent multiple clicks
+      submitBtn.textContent = 'Submitting...';
 
       try {
-        // Get IP address
         const ipResponse = await fetch('https://api.ipify.org?format=json');
         const ipData = await ipResponse.json();
         const ip = ipData.ip || 'unknown';
 
-        // Create new Message object
-        const Message = Parse.Object.extend("Message");
-        const newMessage = new Message();
-        
-        newMessage.set("text", message);
-        newMessage.set("ip", ip);
+        const { error } = await supabase
+                .from('messages')
+                .insert([{ text: message, ip: ip }]);
 
-        await newMessage.save();
+        if (error) throw error;
 
-        // Redirect to success page
+        // Redirect after success
         window.location.href = 'success.html';
 
       } catch (error) {
-        console.error("Error:", error);
-        const errorText = isChinese ? 
-          `错误: ${error.message}` : 
-          `Error: ${error.message}`;
-        statusDiv.textContent = errorText;
+        console.error("Full error:", error);
+        statusDiv.textContent = `Error: ${error.message}`;
         statusDiv.style.color = 'red';
         submitBtn.disabled = false;
-        submitBtn.textContent = isChinese ? '提交留言' : 'Submit Message';
+        submitBtn.textContent = 'Submit Message';
       }
     });
   });
