@@ -2,7 +2,7 @@
 const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+//a real working version
 // Constants
 const MAX_MESSAGES_ON_SCREEN = 30;
 const MESSAGE_ANIMATION_DURATION = 30000; // 30 seconds

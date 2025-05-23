@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Export - UWCCSC Ceremony</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: white;
+        }
+        #qr-container {
+            text-align: center;
+            padding: 20px;
+        }
+        #qrcode {
+            margin: 20px auto;
+        }
+        h1 {
+            font-family: Arial, sans-serif;
+            color: #333;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div id="qr-container">
+        <h1>UWCCSC Ceremony Message Submission</h1>
+        <div id="qrcode"></div>
+    </div>
+
+    <script src="js/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            new QRCode(document.getElementById('qrcode'), {
+                text: 'https://comforting-nougat-4b3124.netlify.app/submit',
+                width: 4000,
+                height: 4000,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        });
+    </script>
+</body>
+</html> 
