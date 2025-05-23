@@ -3,21 +3,12 @@ const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Debug Configuration
-const DEBUG = {
-    enabled: true,
-    container: null,
-    maxLogs: 50,
-    logs: []
-};
-
 // Constants
 const MAX_MESSAGES_ON_SCREEN = 30;
 const MESSAGE_ANIMATION_DURATION = 30000; // 30 seconds
 const MESSAGE_SPAWN_INTERVAL = 1000; // 1 seconds between messages
 const FETCH_INTERVAL = 1000; // 1 second
 const PLAN_B_START_TIME = 25000; // 25 seconds
-const PLAN_B_CHECK_INTERVAL = 1000; // 1 seconds
 const POSITION_MEMORY_SIZE = 5; // Remember last 5 message positions
 const MIN_Y_POSITION = 10; // Minimum Y position (%)
 const MAX_Y_POSITION = 90; // Maximum Y position (%)
@@ -65,105 +56,6 @@ class MessagePosition {
     isRelevant() {
         return (Date.now() - this.timestamp) < MESSAGE_ANIMATION_DURATION;
     }
-}
-
-// Debug Functions
-function initDebugConsole() {
-    if (!DEBUG.enabled) return;
-
-    // Create debug console container
-    DEBUG.container = document.createElement('div');
-    DEBUG.container.style.cssText = `
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 400px;
-        height: 300px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
-        font-family: monospace;
-        font-size: 12px;
-        padding: 10px;
-        overflow-y: auto;
-        z-index: 9999;
-        border-radius: 5px;
-    `;
-    document.body.appendChild(DEBUG.container);
-}
-
-function debugLog(category, message, data = null) {
-    if (!DEBUG.enabled) return;
-
-    const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
-    const logEntry = {
-        timestamp,
-        category,
-        message,
-        data
-    };
-
-    DEBUG.logs.push(logEntry);
-    if (DEBUG.logs.length > DEBUG.maxLogs) {
-        DEBUG.logs.shift();
-    }
-
-    updateDebugDisplay();
-}
-
-function updateDebugDisplay() {
-    if (!DEBUG.enabled || !DEBUG.container) return;
-
-    const stats = getDebugStats();
-    const logHtml = DEBUG.logs.map(log => `
-        <div style="margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 2px;">
-            <span style="color: #888;">[${log.timestamp}]</span>
-            <span style="color: ${getCategoryColor(log.category)};">[${log.category}]</span>
-            <span>${log.message}</span>
-            ${log.data ? `<pre style="margin: 2px 0; color: #aaa;">${JSON.stringify(log.data, null, 2)}</pre>` : ''}
-        </div>
-    `).join('');
-
-    DEBUG.container.innerHTML = `
-        <div style="margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #444;">
-            <strong>System Stats:</strong><br>
-            Active Messages: ${stats.activeMessages}<br>
-            Plan B Active: ${stats.planBActive}<br>
-            Time Since Start: ${stats.timeSinceStart}s<br>
-            Messages/sec: ${stats.messagesPerSecond}
-        </div>
-        <div>${logHtml}</div>
-    `;
-
-    // Auto-scroll to bottom
-    DEBUG.container.scrollTop = DEBUG.container.scrollHeight;
-}
-
-function getCategoryColor(category) {
-    const colors = {
-        'INIT': '#4CAF50',
-        'PLAN-B': '#FF9800',
-        'MESSAGE': '#2196F3',
-        'ERROR': '#f44336',
-        'STATE': '#9C27B0',
-        'POSITION': '#795548'
-    };
-    return colors[category] || '#fff';
-}
-
-function getDebugStats() {
-    const now = Date.now();
-    const runningTime = isStarted ? (now - startTime) / 1000 : 0;
-    const messageCount = DEBUG.logs.filter(log => 
-        log.category === 'MESSAGE' && 
-        now - new Date(`2000-01-01T${log.timestamp}`).getTime() < 1000
-    ).length;
-
-    return {
-        activeMessages: activeMessageElements.size,
-        planBActive: now - startTime >= PLAN_B_START_TIME,
-        timeSinceStart: Math.round(runningTime),
-        messagesPerSecond: messageCount
-    };
 }
 
 // Function to get a safe Y position for a new message
@@ -269,12 +161,6 @@ function checkAndAddPlanBMessage() {
     
     if (timeElapsed < PLAN_B_START_TIME) return;
     
-    debugLog('PLAN-B', 'Checking Plan B conditions', {
-        timeElapsed,
-        timeSinceLastPlanB: currentTime - lastPlanBTime,
-        activeMessages: activeMessageElements.size
-    });
-
     if (currentTime - lastPlanBTime >= MESSAGE_SPAWN_INTERVAL) {
         if (canShowMoreMessages()) {
             const planBMessage = {
@@ -282,14 +168,8 @@ function checkAndAddPlanBMessage() {
                 text: getRandomPlanBMessage(),
                 isPlanB: true
             };
-            debugLog('PLAN-B', 'Adding Plan B message', planBMessage);
             createAndAnimateMessage(planBMessage);
             lastPlanBTime = currentTime;
-        } else {
-            debugLog('PLAN-B', 'Cannot show more messages', {
-                activeMessages: activeMessageElements.size,
-                maxMessages: MAX_MESSAGES_ON_SCREEN
-            });
         }
     }
 }
@@ -328,11 +208,6 @@ async function fetchPlayedMessages() {
 // Function to animate and manage a message
 function createAndAnimateMessage(messageData) {
     if (!isStarted) return;
-
-    debugLog('MESSAGE', `Creating message: ${messageData.text.substring(0, 30)}...`, {
-        id: messageData.id,
-        isPlanB: messageData.isPlanB
-    });
 
     const messageElement = document.createElement('div');
     messageElement.className = 'message';
@@ -438,7 +313,6 @@ function setupRealtime() {
 
 // Function to start the system
 function startSystem() {
-    debugLog('STATE', 'System starting');
     const startButton = document.getElementById('start-button');
     if (startButton) {
         startButton.style.display = 'none';
@@ -448,10 +322,6 @@ function startSystem() {
     lastPlanBTime = startTime;
     
     planBCheckInterval = setInterval(checkAndAddPlanBMessage, MESSAGE_SPAWN_INTERVAL);
-    debugLog('STATE', 'System started successfully', {
-        startTime,
-        checkInterval: MESSAGE_SPAWN_INTERVAL
-    });
 }
 
 // Initialize the system
@@ -459,9 +329,6 @@ async function initializeSystem() {
     if (isInitialized) return;
     
     try {
-        debugLog('INIT', 'Starting system initialization');
-        initDebugConsole();
-
         await Promise.all([
             fetchPlayedMessages(),
             loadPlanBMessages()
@@ -477,9 +344,8 @@ async function initializeSystem() {
         }
         
         isInitialized = true;
-        debugLog('INIT', 'System initialized successfully');
     } catch (error) {
-        debugLog('ERROR', 'Initialization failed', error);
+        console.error('Error initializing system:', error);
         setTimeout(initializeSystem, 1000);
     }
 }
