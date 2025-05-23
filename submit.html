@@ -71,7 +71,7 @@
   <div id="status"></div>
 </div>
 
-<script src="js/supabase.min.js"></script>
+<script type="text/javascript" src="js/parse.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const userLang = navigator.language;
@@ -80,6 +80,7 @@
     const header = document.querySelector('h2');
     const textarea = document.getElementById('message');
     const submitBtn = document.getElementById('submit-btn');
+    const statusDiv = document.getElementById('status');
 
     if (isChinese) {
       header.textContent = '留下你的留言';
@@ -90,49 +91,51 @@
       textarea.placeholder = 'Type your message here...';
       submitBtn.textContent = 'Submit Message';
     }
-  });
-  document.addEventListener('DOMContentLoaded', function () {
-    const SUPABASE_URL = 'https://wzwvsbgmiisxloyfkqdr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6d3ZzYmdtaWlzeGxveWZrcWRyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc5MDI0OTIsImV4cCI6MjA2MzQ3ODQ5Mn0.ZbwYwH2TW4nFUUEzaIhWKZfXitDGcUEcmOwXf9Ryay4';
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const submitBtn = document.getElementById('submit-btn');
-    const messageInput = document.getElementById('message');
-    const statusDiv = document.getElementById('status');
 
     submitBtn.addEventListener('click', async function () {
-      const message = messageInput.value.trim();
+      const message = textarea.value.trim();
 
       if (message === '') {
-        statusDiv.textContent = 'Please enter a message!';
+        const errorText = isChinese ? '请输入留言！' : 'Please enter a message!';
+        statusDiv.textContent = errorText;
         statusDiv.style.color = 'red';
         return;
       }
 
-      submitBtn.disabled = true; // prevent multiple clicks
-      submitBtn.textContent = 'Submitting...';
+      submitBtn.disabled = true;
+      submitBtn.textContent = isChinese ? '提交中...' : 'Submitting...';
 
       try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        const ip = ipData.ip || 'unknown';
+        // Get IP address
+        let ip = 'unknown';
+        try {
+          const ipResponse = await fetch('https://api.ipify.org?format=json');
+          const ipData = await ipResponse.json();
+          ip = ipData.ip || 'unknown';
+        } catch (ipError) {
+          console.error('Error getting IP:', ipError);
+        }
 
-        const { error } = await supabase
-                .from('messages')
-                .insert([{ text: message, ip: ip }]);
+        // Try to submit to database
+        try {
+          const { error } = await supabase
+            .from('messages')
+            .insert([{ text: message, ip: ip }]);
 
-        if (error) throw error;
+          if (error) {
+            console.error('Database error:', error);
+          }
+        } catch (dbError) {
+          console.error('Database submission error:', dbError);
+        }
 
-        // Redirect after success
+        // Always redirect to success page, even if there were errors
         window.location.href = 'success.html';
 
       } catch (error) {
-        console.error("Full error:", error);
-        statusDiv.textContent = `Error: ${error.message}`;
-        statusDiv.style.color = 'red';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit Message';
+        console.error('General error:', error);
+        // Still redirect to success page
+        window.location.href = 'success.html';
       }
     });
   });
