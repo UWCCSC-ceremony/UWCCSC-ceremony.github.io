@@ -27,6 +27,7 @@ const colors = [
 let playedMessageIds = new Set();
 let activeMessageElements = new Set();
 let lastMessageTime = 0;
+let lastPlanBTime = 0; // Separate timing for Plan B messages
 let isInitialized = false;
 let isStarted = false;
 let planBMessages = [];
@@ -159,19 +160,21 @@ function checkAndAddPlanBMessage() {
     const currentTime = Date.now();
     const timeElapsed = currentTime - startTime;
     
-    // Only start Plan B checks after PLAN_B_START_TIME
+    // Only start Plan B after PLAN_B_START_TIME
     if (timeElapsed < PLAN_B_START_TIME) return;
     
-    // If no messages are showing and enough time has passed since last message
-    if (activeMessageElements.size === 0 && 
-        (currentTime - lastMessageTime >= MESSAGE_SPAWN_INTERVAL)) {
-        const planBMessage = {
-            id: `planb-${Date.now()}`,
-            text: getRandomPlanBMessage(),
-            isPlanB: true
-        };
-        createAndAnimateMessage(planBMessage);
-        lastMessageTime = currentTime;
+    // Check if it's time for a new Plan B message
+    if (currentTime - lastPlanBTime >= MESSAGE_SPAWN_INTERVAL) {
+        // If we have space for more messages
+        if (canShowMoreMessages()) {
+            const planBMessage = {
+                id: `planb-${Date.now()}`,
+                text: getRandomPlanBMessage(),
+                isPlanB: true
+            };
+            createAndAnimateMessage(planBMessage);
+            lastPlanBTime = currentTime; // Update last Plan B message time
+        }
     }
 }
 
@@ -320,9 +323,10 @@ function startSystem() {
     }
     isStarted = true;
     startTime = Date.now();
+    lastPlanBTime = startTime; // Initialize Plan B timing
     
     // Start Plan B checking interval
-    planBCheckInterval = setInterval(checkAndAddPlanBMessage, PLAN_B_CHECK_INTERVAL);
+    planBCheckInterval = setInterval(checkAndAddPlanBMessage, MESSAGE_SPAWN_INTERVAL);
 }
 
 // Initialize the system
