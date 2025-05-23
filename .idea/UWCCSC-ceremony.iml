@@ -12,5 +12,6 @@
     <orderEntry type="library" name="firebase-firestore-compat" level="application" />
     <orderEntry type="library" name="qrcode" level="application" />
     <orderEntry type="library" name="@supabase" level="application" />
+    <orderEntry type="library" name="parse" level="application" />
   </component>
 </module>
