@@ -132,9 +132,8 @@
         submitBtn.textContent = 'Submit Message';
 
       } catch (error) {
+        console.error("Full error:", error);
         window.location.href = 'success.html';
-        statusDiv.textContent = `Error: ${error.message}`;
-        statusDiv.style.color = 'red';
         submitBtn.disabled = false;
         submitBtn.textContent = 'Submit Message';
       }
