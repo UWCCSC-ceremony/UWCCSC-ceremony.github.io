@@ -122,15 +122,12 @@
           const { error } = await supabase
             .from('messages')
             .insert([{ text: message, ip: ip }]);
-            window.location.href = 'success.html';
 
           if (error) {
             console.error('Database error:', error);
-            window.location.href = 'success.html';
           }
         } catch (dbError) {
           console.error('Database submission error:', dbError);
-          window.location.href = 'success.html';
 
         }
 
