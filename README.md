@@ -1,5 +1,3 @@
-
-
 # UWCCSC Ceremony Message Board
 
 ![Preview](./demo.png)
@@ -9,7 +7,6 @@ A real-time message display system for ceremonies. Participants submit messages 
 ## Table of Contents
 - [Features](#features)
 - [Requirements](#requirements)
-- [Quick Start](#quick-start)
 - [Deployment](#deployment)
 - [Customization](#customization)
 - [Testing Utilities](#testing-utilities)
@@ -42,10 +39,52 @@ A real-time message display system for ceremonies. Participants submit messages 
 ### Production
 - Web server (Apache/Nginx)
 - MySQL/MariaDB database
-- PHP 7.4+ with PDO extension
 
-## Quick Start
+- ## Deployment
+- Configure your web server to point to the project root.
+- Set up database.
+- Initialize the message table.
+- Populate `planb.txt` with default fallback messages.
+- **Note**: The database solution was hosted outside of China mainland, so you will need to bypass the China internet wall to submit a message.
 
-1. Clone repository:
-   ```bash
-   git clone https://github.com/yourusername/uwccsc-message-board.git
+
+## Customization
+
+### Background Image
+- Replace `/background.jpg` with your image (recommended 16:9 aspect ratio, 1920×1080 px or higher).
+
+### Fallback Messages
+- Edit `planb.txt` with one message per line (max 140 characters, UTF-8 encoding).
+
+## Testing Utilities
+
+### Fake Submission
+- Access `submit_fake.html` directly to simulate successful submissions without writing to the real database.
+
+### QR Code Generation
+- Open `qr_export.html` and adjust parameters:
+  - Size: 100–4000 px  
+  - Export as PNG 
+
+## Troubleshooting
+
+### Messages not displaying
+- Verify database connection  
+- Check message table structure  
+- Ensure the Start button was clicked
+
+### QR code issues
+- Confirm server accessibility  
+- Test URL manually
+
+### Submission errors
+- Check PHP error logs  
+- Validate form field requirements
+
+## Contributing
+- Fork the repository  
+- Create a feature branch: `git checkout -b feature/awesome-improvement`  
+- Commit your changes: `git commit -m "Add awesome improvement"`  
+- Push to the branch: `git push origin feature/awesome-improvement`  
+- Open a Pull Request describing your changes  
+
