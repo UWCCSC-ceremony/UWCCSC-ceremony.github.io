@@ -1,5 +1,7 @@
 # UWCCSC Ceremony Message Board
 
+🌐 [English](README.md) | [简体中文](README.zh-CN.md)
+
 ![Preview](./demo.png)
 
 A real-time message display system for ceremonies. Participants submit messages via QR code, which are displayed on a central screen. Includes fallback messages and testing utilities.
