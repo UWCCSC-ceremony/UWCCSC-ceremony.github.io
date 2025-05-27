@@ -1,6 +1,6 @@
-🌐 [English](README.md) | [简体中文](README.zh-CN.md)
-
 # UWCCSC 典礼留言展示系统
+
+🌐 [English](README.md) | [简体中文](README.zh-CN.md)
 
 ![预览](./demo.png)
 
