@@ -94,3 +94,21 @@ A real-time message display system for ceremonies. Participants submit messages 
 This project is licensed under the MIT License.  
 See [LICENSE](./LICENSE) for the original English version.  
 See [LICENSE.zh-CN.md](./LICENSE.zh-CN.md) for a Simplified Chinese translation.
+
+## Special Authorization Statement
+
+This project is released under the [Attribution-NonCommercial 4.0 International (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/) license. However, the author **Aidebug** grants the following special authorization:
+
+**UWC Changshu China**
+
+is hereby permitted to use this work **for commercial and institutional purposes**, under the following conditions:
+
+- **Authorized Party**: UWC Changshu China  
+- **Permitted Use**: Including but not limited to educational promotion, course materials, public events, and other activities related to the school.  
+- **Scope**: Reproduction, display, distribution, and publication of the original work is permitted.  
+- **Term**: Permanent  
+- **Other Conditions**:  
+  - Attribution to the original author (Aidebug) is required;  
+  - This authorization is non-transferable;  
+  - This does not imply permission for other entities to use this work commercially.
+
