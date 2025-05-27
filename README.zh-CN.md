@@ -14,6 +14,8 @@
 - [测试工具](#测试工具)
 - [常见问题](#常见问题)
 - [贡献方式](#贡献方式)
+- [许可协议](#许可协议)
+
 
 ## 功能介绍
 
@@ -88,4 +90,9 @@
 - 提交更改：`git commit -m "Add awesome improvement"`  
 - 推送到远程仓库：`git push origin feature/awesome-improvement`  
 - 提交 Pull Request 描述你的更改  
+
+## 许可协议
+本项目采用 MIT 许可协议。  
+请参阅 [LICENSE](./LICENSE) 查看英文原文。  
+简体中文版请参阅 [LICENSE.zh-CN.md](./LICENSE.zh-CN.md)。
 
