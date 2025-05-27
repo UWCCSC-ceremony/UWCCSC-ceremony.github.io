@@ -1,62 +1,51 @@
-# UWCCSC Ceremony Interactive Message System
 
-![Background Preview](./background.jpg)
 
-A real-time message display system for UWCCSC events. Participants submit messages via QR code, which are displayed on a central screen after ceremony commencement.
+# UWCCSC Ceremony Message Board
 
-## Key Features
-- QR Code scanning to message submission portal
-- Central display page with manual message playback control
-- Fallback message system when no submissions exist
-- Customizable background image
-- High-resolution QR code export capability
-- Graceful failure handling for submissions
+![Preview](./demo.jpg)
 
-## Technical Details
-**Dependencies**: Zero external dependencies - all required resources included  
-**Database**: Requires MySQL/MariaDB for message storage  
-**Server**: Needs PHP-enabled web server for operation  
+A real-time message display system for ceremonies. Participants submit messages via QR code, which are displayed on a central screen. Includes fallback messages and testing utilities.
 
-## System Components
-| File | Purpose |
-|------|---------|
-| `index.html` | Main display page with start button |
-| `submit.html` | Participant message submission form |
-| `planb.txt` | Preconfigured fallback messages |
-| `qr_export.html` | QR code generator (max 4000×4000px) |
-| `submit_fake.html` | Testing form (bypasses database) |
+## Table of Contents
+- [Features](#features)
+- [Requirements](#requirements)
+- [Quick Start](#quick-start)
+- [Deployment](#deployment)
+- [Customization](#customization)
+- [Testing Utilities](#testing-utilities)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Usage Instructions
+## Features
 
-### For Attendees
-1. Scan ceremony QR code
-2. Submit message through web form
-3. Messages display after MC initiates playback
+### Core Functionality
+- **QR Code Access**: Participants scan QR code to access message submission form
+- **Message Queue System**: 
+  - Start button-controlled display initiation
+  - Automatic fallback to planb.txt when no messages available
+- **Real-time Display**: Submitted messages appear instantly on index.html
+- **High-Resolution Export**: QR code generator supports up to 4000×4000 px exports
 
-### For Administrators
-**Start Playback:**
-1. Open `index.html` on main screen
-2. Click start button when ceremony begins
+### Admin Features
+- Background customization via background.jpg replacement
+- Fake submission testing system (submit_fake.html)
+- Graceful failure handling (users always see success page)
 
-**Customization:**
-- Replace `background.jpg` with same filename
-- Edit `planb.txt` for fallback messages
+## Requirements
 
-**Testing:**
-- Use `submit_fake.html` for system testing
-- QR export via `qr_export.html`
+### Development
+- Modern web browser (Chrome/Firefox recommended)
+- Basic text editor
+- Git (optional)
 
-## Deployment Requirements
-1. Web server
-2. MySQL/MariaDB database
+### Production
+- Web server (Apache/Nginx)
+- MySQL/MariaDB database
+- PHP 7.4+ with PDO extension
 
-## Development Notes
-- Commit messages may not reflect actual changes
-- Failed submissions redirect to success page
-- Test thoroughly with fake submission form
-- QR code dimensions configurable in export tool
+## Quick Start
 
-## License
-UWCCSC Internal Use Only - Not for Public Distribution
-
-[Contact Technical Team] - [tech-support@uwccsc.edu]
+1. Clone repository:
+   ```bash
+   git clone https://github.com/yourusername/uwccsc-message-board.git
