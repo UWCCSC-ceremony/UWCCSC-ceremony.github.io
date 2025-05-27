@@ -90,3 +90,7 @@ A real-time message display system for ceremonies. Participants submit messages 
 - Push to the branch: `git push origin feature/awesome-improvement`  
 - Open a Pull Request describing your changes  
 
+## License
+This project is licensed under the MIT License.  
+See [LICENSE](./LICENSE) for the original English version.  
+See [LICENSE.zh-CN.md](./LICENSE.zh-CN.md) for a Simplified Chinese translation.
