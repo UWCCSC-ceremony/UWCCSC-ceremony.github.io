@@ -96,3 +96,19 @@
 请参阅 [LICENSE](./LICENSE) 查看英文原文。  
 简体中文版请参阅 [LICENSE.zh-CN.md](./LICENSE.zh-CN.md)。
 
+## 特别授权声明
+
+尽管本作品整体采用 [署名-非商业性使用 4.0 国际 (CC BY-NC 4.0)](https://creativecommons.org/licenses/by-nc/4.0/deed.zh) 协议发布，作者 Aidebug 特此授权：
+
+**常熟世界联合学院（UWC Changshu China）**
+
+在以下条件下进行本作品的商业性使用：
+
+- **被授权方名称（Authorized Party）**: 常熟世界联合学院（UWC Changshu China）
+- **授权用途（Permitted Use）**: 可将本作品用于商业或教学相关的活动与展示，包括不限于学校宣传、课程材料、公开演示等。
+- **授权范围（Scope）**: 允许在不更改原始作品的基础上复制、展示、传播与发布本作品内容。
+- **授权期限（Term）**: 永久授权（Permanent Authorization）
+- **其他限制（Other Conditions）**: 
+  - 须保留原作者署名（Aidebug）；
+  - 不得向其他第三方转授权；
+  - 本授权不代表对其他单位或个人开放商业使用权限。
